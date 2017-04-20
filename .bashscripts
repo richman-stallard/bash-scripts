@@ -1,6 +1,8 @@
 #!/bin/bash
 # Define userscripts here that you want to be able to access.
-# This file is intended to be sourced by .bashrc.
+# This file is intended to be sourced by .bashrc. Put it in ~ and add the
+# following to .bashrc:
+# if [ -f ~/.bashscripts ]; then source ~/.bashscripts; fi
 
 wat() {
     # tell what options of a command do
