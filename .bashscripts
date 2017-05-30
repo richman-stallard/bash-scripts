@@ -17,7 +17,7 @@ flipflop() {
     # turn regular text into upside-down text
     # example usage: $ flipflop "upside-down, pls"
     sed '
-        y/!?_.<>()/¡¿‾·><)(/
+        y/!?_.<>(),'/¡¿‾·><)(',/
         y/ZYXWVUTSRQPONMLKJIHGFEDCBA/Z⅄XMΛ∩┴SɹQԀONW˥ʞſIHפℲƎpƆq∀/
         y/zyxwvutsrqponmlkjihgfedcba/zʎxʍʌnʇsɹbdouɯlʞɾ!ɥƃɟǝpɔqɐ/
         y/9876543210/68ㄥ9ϛㄣƐᄅƖ0/
@@ -28,7 +28,7 @@ fff() {
     # file flip flop. Reads text to flip upside-down from file
     # example usage: $ fff mypasta.txt
     cat "$1" | sed '
-        y/!?_.<>()/¡¿‾·><)(/
+        y/!?_.<>(),'/¡¿‾·><)(',/
         y/ZYXWVUTSRQPONMLKJIHGFEDCBA/Z⅄XMΛ∩┴SɹQԀONW˥ʞſIHפℲƎpƆq∀/
         y/zyxwvutsrqponmlkjihgfedcba/zʎxʍʌnʇsɹbdouɯlʞɾ!ɥƃɟǝpɔqɐ/
         y/9876543210/68ㄥ9ϛㄣƐᄅƖ0/
