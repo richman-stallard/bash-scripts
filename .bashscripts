@@ -170,3 +170,18 @@ latex() {
     fi
     pdflatex "$1" && pdflatex "$1" && evince "${1%.*}.pdf"
 }
+
+vgaconnect() {
+    # invoke after connecting / disconnecting VGA output for secondary monitor
+    # example usage: $ vgaconnect
+    PRIM="LVDS1"
+    EXT="VGA1"
+    if [ -n "$(xrandr | grep "$EXT disconnected")" ]
+    then
+        xrandr --output "$PRIM" --auto --output "$EXT" --off \
+        && echo "VGA disconnected"
+    else
+        xrandr --output "$PRIM" --auto --output "$EXT" --auto --left-of "$PRIM" \
+        && echo "VGA connected"
+     fi
+ }
