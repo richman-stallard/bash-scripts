@@ -95,7 +95,7 @@ int main() {
     }
     return 0;
 }' > "$outfile"
-    nano "$outfile"
+    vim "$outfile"
     #if [[ -z "$1" ]]; then rm "$outfile"; fi
 }
 
@@ -124,7 +124,7 @@ newpy() {
 if __name__ == "__main__":
     main()' > "$outfile"
 
-    nano "$outfile"
+    vim "$outfile"
     #if [[ -z "$1" ]]; then rm "$outfile"; fi
 }
 
