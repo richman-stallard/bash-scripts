@@ -159,3 +159,14 @@ beep() {
     fi
     play -q -n synth "$duration" sin "$pitch" |  echo -e "\a"
 }
+
+latex() {
+    # shorthand for quickly compiling and viewing latex files
+    # example usage: $ latex mydoc.tex
+    if [[ $1 == "" ]]
+    then
+        echo "Error! Argument required!"
+        return 42
+    fi
+    pdflatex "$1" && pdflatex "$1" && evince "${1%.*}.pdf"
+}
