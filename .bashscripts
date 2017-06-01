@@ -149,14 +149,14 @@ desc() {
     done
 }
 
-beep() {
+piep() {
     # terminal bell is usually silent, play sine over speakers in addition to it
     # optional args determine duration and pitch
     # requires sox
     # example usage:
-    # $ beep        # half-second beep at 880 Hz
-    # $ beep 2      # this beep is 2 seconds long
-    # $ beep 1 440  # this beep is 1 second long and 1 octave lower than standard
+    # $ piep        # half-second beep at 880 Hz
+    # $ piep 2      # this beep is 2 seconds long
+    # $ piep 1 440  # this beep is 1 second long and 1 octave lower than standard
     if [[ $1 == "" ]]
     then
         duration="0.05"    
@@ -172,9 +172,9 @@ beep() {
     play -q -n synth "$duration" sin "$pitch" |  echo -e "\a"
 }
 
-latex() {
+quicklatex() {
     # shorthand for quickly compiling and viewing latex files
-    # example usage: $ latex mydoc.tex
+    # example usage: $ quicklatex mydoc.tex
     if [[ $1 == "" ]]
     then
         echo "Error! Argument required!"
