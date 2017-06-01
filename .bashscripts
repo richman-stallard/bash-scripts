@@ -16,29 +16,31 @@ wat() {
 flipflop() {
     # turn regular text into upside-down text
     # example usage: $ flipflop "upside-down, pls"
-    sed '
+    sed "
         y/!?_.<>(),'/¡¿‾·><)(',/
         y/ZYXWVUTSRQPONMLKJIHGFEDCBA/Z⅄XMΛ∩┴SɹQԀONW˥ʞſIHפℲƎpƆq∀/
         y/zyxwvutsrqponmlkjihgfedcba/zʎxʍʌnʇsɹbdouɯlʞɾ!ɥƃɟǝpɔqɐ/
         y/9876543210/68ㄥ9ϛㄣƐᄅƖ0/
-    ' <<< "${@:-$(</dev/stdin)}" | rev | tac
+    " <<< "${@:-$(</dev/stdin)}" | rev | tac
 }
 
 fff() {
     # file flip flop. Reads text to flip upside-down from file
     # example usage: $ fff mypasta.txt
-    cat "$1" | sed '
+    cat "$1" | sed "
         y/!?_.<>(),'/¡¿‾·><)(',/
         y/ZYXWVUTSRQPONMLKJIHGFEDCBA/Z⅄XMΛ∩┴SɹQԀONW˥ʞſIHפℲƎpƆq∀/
         y/zyxwvutsrqponmlkjihgfedcba/zʎxʍʌnʇsɹbdouɯlʞɾ!ɥƃɟǝpɔqɐ/
         y/9876543210/68ㄥ9ϛㄣƐᄅƖ0/
-    ' | rev | tac
+    " | rev | tac
 }
 
 reverse() {
     # reverses an audio clip
     # if input clip is not in wav format, uses ffmpeg to convert to wav
     # if output clip is not wav, uses ffmpeg to convert into desired format
+    # requires sox
+    # requires ffmpeg if conversion is necessary
     # example usage: $ reverse forwardaudio.wav reverse.ogg
     f1=$(sed 's/\.[a-zA-Z0-9_-]*$//' <<< "$1")    
     e1=$(sed "s/$f1//" <<< "$1")    
@@ -59,7 +61,10 @@ reverse() {
 
 interject() {
     # echo the GNU/Linux interjection pasta for convenient copypasting
-    echo "I'd just like to interject for a moment. What you're referring to as Linux, is in fact, GNU/Linux, or as I've recently taken to calling it, GNU plus Linux. Linux is not an operating system unto itself, but rather another free component of a fully functioning GNU system made useful by the GNU corelibs, shell utilities and vital system components comprising a full OS as defined by POSIX.
+    # change CLIPBOARD to cat if you just want it echoed, or if you use a different clipboard like xclip
+    # example usage: $ interject
+    CLIPBOARD="xsel"
+    echo "I'd just like to interject for a moment. What you're referring to as Linux, is in fact, GNU/Linux, or as I've recently taken to calling it, GNU plus Linux. Linux is not an operating system unto itself, but rather another free component of a fully functioning GNU system made useful by the GNU corelibs, shell utilities and vital system components comprising a full OS as defined by POSIX. | "$CLIPBOARD"
 
 Many computer users run a modified version of the GNU system every day, without realizing it. Through a peculiar turn of events, the version of GNU which is widely used today is often called \"Linux\", and many of its users are not aware that it is basically the GNU system, developed by the GNU Project.
 
@@ -67,15 +72,18 @@ There really is a Linux, and these people are using it, but it is just a part of
 }
 
 navyseal() {
-    # echo the Gorilla warfare pasta for convenient shitposting
-    echo "What the fuck did you just fucking say about me, you little bitch? I’ll have you know I graduated top of my class in the Navy Seals, and I’ve been involved in numerous secret raids on Al-Quaeda, and I have over 300 confirmed kills. I am trained in gorilla warfare and I’m the top sniper in the entire US armed forces. You are nothing to me but just another target. I will wipe you the fuck out with precision the likes of which has never been seen before on this Earth, mark my fucking words. You think you can get away with saying that shit to me over the Internet? Think again, fucker. As we speak I am contacting my secret network of spies across the USA and your IP is being traced right now so you better prepare for the storm, maggot. The storm that wipes out the pathetic little thing you call your life. You’re fucking dead, kid. I can be anywhere, anytime, and I can kill you in over seven hundred ways, and that’s just with my bare hands. Not only am I extensively trained in unarmed combat, but I have access to the entire arsenal of the United States Marine Corps and I will use it to its full extent to wipe your miserable ass off the face of the continent, you little shit. If only you could have known what unholy retribution your little “clever” comment was about to bring down upon you, maybe you would have held your fucking tongue. But you couldn’t, you didn’t, and now you’re paying the price, you goddamn idiot. I will shit fury all over you and you will drown in it. You’re fucking dead, kiddo."
+    # echo the Gorilla warfare pasta for convenient copypasting
+    # change CLIPBOARD to cat if you just want it echoed, or if you use a different clipboard like xclip
+    # example usage: $ navyseal
+    CLIPBOARD="xsel"
+    echo "What the fuck did you just fucking say about me, you little bitch? I’ll have you know I graduated top of my class in the Navy Seals, and I’ve been involved in numerous secret raids on Al-Quaeda, and I have over 300 confirmed kills. I am trained in gorilla warfare and I’m the top sniper in the entire US armed forces. You are nothing to me but just another target. I will wipe you the fuck out with precision the likes of which has never been seen before on this Earth, mark my fucking words. You think you can get away with saying that shit to me over the Internet? Think again, fucker. As we speak I am contacting my secret network of spies across the USA and your IP is being traced right now so you better prepare for the storm, maggot. The storm that wipes out the pathetic little thing you call your life. You’re fucking dead, kid. I can be anywhere, anytime, and I can kill you in over seven hundred ways, and that’s just with my bare hands. Not only am I extensively trained in unarmed combat, but I have access to the entire arsenal of the United States Marine Corps and I will use it to its full extent to wipe your miserable ass off the face of the continent, you little shit. If only you could have known what unholy retribution your little “clever” comment was about to bring down upon you, maybe you would have held your fucking tongue. But you couldn’t, you didn’t, and now you’re paying the price, you goddamn idiot. I will shit fury all over you and you will drown in it. You’re fucking dead, kiddo." | "$CLIPBOARD"
 }
 
 newc() {
     # start a new basic C program
     # example usage:
-    # $ newc # creates and opens timestamped file in /tmp
-    # $ newc myprog.c # creates myprog.c in current working directory
+    # $ newc            # creates and opens timestamped file in /tmp
+    # $ newc myprog.c   # creates myprog.c in current working directory
     if [[ -z "$1" ]]; then
         outfile="/tmp/newc.$(date -Iseconds).c"
     else
@@ -102,7 +110,7 @@ int main() {
 newpy() {
     # start a new basic python program
     # example usage:
-    # $ newpy # creates and opens timestamped file in /tmp
+    # $ newpy           # creates and opens timestamped file in /tmp
     # $ newpy myprog.py # creates myprog.py in current working directory
     if [[ -z "$1" ]]; then
         outfile="/tmp/newpy.$(date -Iseconds).py"
@@ -130,6 +138,7 @@ if __name__ == "__main__":
 
 desc() {
     # get description of youtube video(s) from their video ID
+    # requires youtube-dl
     # example usage: $ desc xe27GQJpdqI ow3-1iWVKws
     for ele in "$@"; do
         link="https://youtube.com/watch?v=$ele"
@@ -143,8 +152,11 @@ desc() {
 beep() {
     # terminal bell is usually silent, play sine over speakers in addition to it
     # optional args determine duration and pitch
+    # requires sox
     # example usage:
-    # $ beep
+    # $ beep        # half-second beep at 880 Hz
+    # $ beep 2      # this beep is 2 seconds long
+    # $ beep 1 440  # this beep is 1 second long and 1 octave lower than standard
     if [[ $1 == "" ]]
     then
         duration="0.05"    
@@ -173,15 +185,17 @@ latex() {
 
 vgaconnect() {
     # invoke after connecting / disconnecting secondary monitor
+    # change ALERT to echo if you want to stick to the terminal
     # example usage: $ vgaconnect
     PRIM="LVDS1"
     EXT="VGA1"
+    ALERT="notify-send"
     if [ -n "$(xrandr | grep "$EXT disconnected")" ]
     then
         xrandr --output "$PRIM" --auto --output "$EXT" --off \
-        && echo "$EXT disconnected"
+        && "$ALERT" "$EXT disconnected"
     else
         xrandr --output "$PRIM" --auto --output "$EXT" --auto --left-of "$PRIM" \
-        && echo "$EXT connected"
+        && "$ALERT" "$EXT connected"
      fi
  }
