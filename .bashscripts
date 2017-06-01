@@ -179,9 +179,9 @@ vgaconnect() {
     if [ -n "$(xrandr | grep "$EXT disconnected")" ]
     then
         xrandr --output "$PRIM" --auto --output "$EXT" --off \
-        && echo "VGA disconnected"
+        && echo "$EXT disconnected"
     else
         xrandr --output "$PRIM" --auto --output "$EXT" --auto --left-of "$PRIM" \
-        && echo "VGA connected"
+        && echo "$EXT connected"
      fi
  }
