@@ -172,7 +172,7 @@ latex() {
 }
 
 vgaconnect() {
-    # invoke after connecting / disconnecting VGA output for secondary monitor
+    # invoke after connecting / disconnecting secondary monitor
     # example usage: $ vgaconnect
     PRIM="LVDS1"
     EXT="VGA1"
