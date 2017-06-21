@@ -1,21 +1,131 @@
 #!/bin/bash
 # Define userscripts here that you want to be able to access.
 # This file is intended to be sourced by .bashrc. Put it in ~ and add the
-# following to .bashrc:
-# if [ -f ~/.bashscripts ]; then source ~/.bashscripts; fi
+# following to .bashrc:# if [ -f ~/.bashscripts ]; then source ~/.bashscripts; fi
 
 wat() {
-    # tell what options of a command do
-    # example usage: $ wat grep -A
+    # Tell what options of a command do.
+    # Example usage:
+    # $ wat grep -A
     x="${1:?}"; shift; y=("${@:?}")
     for i in "${y[@]}"; do
         man "${x}" | sed -n "/^\s*${i}/,/^$/p"
     done
 }
 
+piep() {
+    # Terminal bell is usually silent, play sine over speakers additionally.
+    # Optional args determine duration and pitch.
+    # Example usage:
+    # $ piep
+    if [[ $1 == "" ]]; then
+        duration="0.05"
+    else
+        duration="$1"
+    fi
+    if [[ $2 == "" ]]; then
+        pitch="880"
+    else
+        pitch="$2"
+    fi
+    play -q -n synth "$duration" sin "$pitch" |  echo -e "\a"
+}
+
+enotify() {
+    # Automatically send an email to someone.
+    # Intended as notification when long-running jobs finish or fail.
+    # Personally, I set this up to send myself an email.
+    # Message body, if specified, must be last arg.
+    # Requires properly set up MTA. Tested with msmtp + msmtp-mta.
+    # Example usage:
+    # $ enotify # sends standard notification
+    # $ enotify -m "Your job is done!" # specified message content
+    # $ enotify -s "" different.email@openmailbox.org # empty subject
+    #
+    # User variables.
+    SENDER_EMAIL="richman.stallard@openmailbox.org"
+    DEFAULT_REC="richman.stallard@openmailbox.org"
+    #
+    show_help() {
+        # Local script for showing help so I don't have to indent so much.
+        echo "Usage: enotify [options] [{recipients}]"
+        echo
+        echo "Options:"
+        echo "  -s subject              Specify email subject."
+        echo "  (-m | -b) message       Specify email message body."
+        echo "  -h                      Show this help and exit."
+    }
+    OPTIND=1
+    who=$(whoami)
+    hst=$(hostname)
+    frm="$who@$hst <$SENDER_EMAIL>" # sender
+    sbj="Notification from $who@$hst" # message subject
+    msg="Something happened at $hst." # message body
+    while getopts "s:m:b:h?" opt; do
+        case "$opt" in
+            s)
+                sbj=$OPTARG
+            ;;
+            m|b)
+                msg=$OPTARG
+            ;;
+            h)
+                show_help
+                #exit 0
+            ;;
+        esac
+    done
+    shift $((OPTIND-1))
+    [ "$1" = "--" ] && shift
+    if [ -n "$1" ]; then
+        rec="$@"
+    else
+        rec="$DEFAULT_REC"
+    fi
+    echo "From:     $frm
+To:       $rec
+Subject:  $sbj
+
+$msg" | sendmail $rec
+}
+
+quicklatex() {
+    # Shorthand for quickly compiling and viewing latex files.
+    # DO NOT USE THIS IF YOU HAVE FILES WITH THE SAME FILENAME (EXCEPT ENDING)
+    # IN THE SAME DIRECTORY, THEY WILL BE DELETED.
+    # Example usage:
+    # $ latex mydoc.tex
+    if [[ $1 == "" ]]; then
+        echo "Error: Argument required!"
+        return 42
+    fi
+    pdflatex "$1" && pdflatex "$1" && evince "${1%.*}.pdf" \
+    && find . -maxdepth 1 -regex ".*/${1%.*}.*" \! -regex ".*/$1.*"   \
+    -exec rm {} \;
+}
+
+vgaconnect() {
+    # Invoke after connecting / disconnecting VGA output for secondary monitor.
+    # Example usage:
+    # $ vgaconnect
+    #
+    # User variables.
+    PRIM="LVDS1"
+    EXT="VGA1"
+    #
+    if [ -n "$(xrandr | grep "$EXT disconnected")" ]; then
+        xrandr --output "$PRIM" --auto --output "$EXT" --off \
+        && echo "VGA disconnected"
+    else
+        xrandr --output "$PRIM" --auto --output "$EXT" --auto --left-of "$PRIM" \
+        && echo "VGA connected"
+    fi
+}
+
 flipflop() {
-    # turn regular text into upside-down text
-    # example usage: $ flipflop "upside-down, pls"
+    # Turn regular text into upside-down text.
+    # Example usage:
+    # $ flipflop "upside-down, pls"
     sed "
         y/!?_.<>(),'/¡¿‾·><)(',/
         y/ZYXWVUTSRQPONMLKJIHGFEDCBA/Z⅄XMΛ∩┴SɹQԀONW˥ʞſIHפℲƎpƆq∀/
@@ -24,28 +134,16 @@ flipflop() {
     " <<< "${@:-$(</dev/stdin)}" | rev | tac
 }
 
-fff() {
-    # file flip flop. Reads text to flip upside-down from file
-    # example usage: $ fff mypasta.txt
-    cat "$1" | sed "
-        y/!?_.<>(),'/¡¿‾·><)(',/
-        y/ZYXWVUTSRQPONMLKJIHGFEDCBA/Z⅄XMΛ∩┴SɹQԀONW˥ʞſIHפℲƎpƆq∀/
-        y/zyxwvutsrqponmlkjihgfedcba/zʎxʍʌnʇsɹbdouɯlʞɾ!ɥƃɟǝpɔqɐ/
-        y/9876543210/68ㄥ9ϛㄣƐᄅƖ0/
-    " | rev | tac
-}
-
 reverse() {
-    # reverses an audio clip
-    # if input clip is not in wav format, uses ffmpeg to convert to wav
-    # if output clip is not wav, uses ffmpeg to convert into desired format
-    # requires sox
-    # requires ffmpeg if conversion is necessary
-    # example usage: $ reverse forwardaudio.wav reverse.ogg
-    f1=$(sed 's/\.[a-zA-Z0-9_-]*$//' <<< "$1")    
-    e1=$(sed "s/$f1//" <<< "$1")    
-    f2=$(sed 's/\.[a-zA-Z0-9_-]*$//' <<< "$2")    
-    e2=$(sed "s/$f2//" <<< "$2")    
+    # Reverses an audio clip.
+    # If input clip is not in wav format, uses ffmpeg to convert to wav.
+    # If output clip is not wav, uses ffmpeg to convert into desired format.
+    # Example usage:
+    # $ reverse forwardaudio.wav reverse.ogg
+    f1=$(sed 's/\.[a-zA-Z0-9_-]*$//' <<< "$1")
+    e1=$(sed "s/$f1//" <<< "$1")
+    f2=$(sed 's/\.[a-zA-Z0-9_-]*$//' <<< "$2")
+    e2=$(sed "s/$f2//" <<< "$2")
     if [ "$e1" != ".wav" ]; then
         ffmpeg -i "$1" -vn -sn "$f1.wav"
     fi
@@ -60,134 +158,38 @@ reverse() {
 }
 
 interject() {
-    # echo the GNU/Linux interjection pasta for convenient copypasting
-    # change CLIPBOARD to cat if you just want it echoed, or if you use a different clipboard like xclip
-    # example usage: $ interject
-    CLIPBOARD="xsel"
-    echo "I'd just like to interject for a moment. What you're referring to as Linux, is in fact, GNU/Linux, or as I've recently taken to calling it, GNU plus Linux. Linux is not an operating system unto itself, but rather another free component of a fully functioning GNU system made useful by the GNU corelibs, shell utilities and vital system components comprising a full OS as defined by POSIX. | "$CLIPBOARD"
+    # Echo the GNU/Linux interjection pasta for convenient copypasting.
+    echo "I'd just like to interject for a moment. What you're referring to as \
+Linux, is in fact, GNU/Linux, or as I've recently taken to calling it, GNU \
+plus Linux. Linux is not an operating system unto itself, but rather another \
+free component of a fully functioning GNU system made useful by the GNU \
+corelibs, shell utilities and vital system components comprising a full OS as \
+defined by POSIX.
 
-Many computer users run a modified version of the GNU system every day, without realizing it. Through a peculiar turn of events, the version of GNU which is widely used today is often called \"Linux\", and many of its users are not aware that it is basically the GNU system, developed by the GNU Project.
+Many computer users run a modified version of the GNU system every day, \
+without realizing it. Through a peculiar turn of events, the version of GNU \
+which is widely used today is often called \"Linux\", and many of its users \
+are not aware that it is basically the GNU system, developed by the GNU Project.
 
-There really is a Linux, and these people are using it, but it is just a part of the system they use. Linux is the kernel: the program in the system that allocates the machine's resources to the other programs that you run. The kernel is an essential part of an operating system, but useless by itself; it can only function in the context of a complete operating system. Linux is normally used in combination with the GNU operating system: the whole system is basically GNU with Linux added, or GNU/Linux. All the so-called \"Linux\" distributions are really distributions of GNU/Linux."
-}
-
-newc() {
-    # start a new basic C program
-    # example usage:
-    # $ newc            # creates and opens timestamped file in /tmp
-    # $ newc myprog.c   # creates myprog.c in current working directory
-    if [[ -z "$1" ]]; then
-        outfile="/tmp/newc.$(date -Iseconds).c"
-    else
-        outfile="$1"
-    fi
-    echo '#include <stdio.h>
-#include <stdlib.h>
-
-int main() {
-    char ins[32];
-    
-    for (;;) {
-        printf("> ");
-        scanf("%s", ins);
-        
-        printf("%s\n", ins);
-    }
-    return 0;
-}' > "$outfile"
-    vim "$outfile"
-    #if [[ -z "$1" ]]; then rm "$outfile"; fi
-}
-
-newpy() {
-    # start a new basic python program
-    # example usage:
-    # $ newpy           # creates and opens timestamped file in /tmp
-    # $ newpy myprog.py # creates myprog.py in current working directory
-    if [[ -z "$1" ]]; then
-        outfile="/tmp/newpy.$(date -Iseconds).py"
-    else
-        outfile="$1"
-    fi
-    echo 'def main():
-    ins = ""
-    try:
-        while True:
-            print(">"),
-            ins = raw_input()
-            
-            print(ins)
-    except KeyboardInterrupt:
-        pass
-    
-    return 0
-if __name__ == "__main__":
-    main()' > "$outfile"
-
-    vim "$outfile"
-    #if [[ -z "$1" ]]; then rm "$outfile"; fi
+There really is a Linux, and these people are using it, but it is just a part \
+of the system they use. Linux is the kernel: the program in the system that \
+allocates the machine's resources to the other programs that you run. The \
+kernel is an essential part of an operating system, but useless by itself; it \
+can only function in the context of a complete operating system. Linux is \
+normally used in combination with the GNU operating system: the whole system \
+is basically GNU with Linux added, or GNU/Linux. All the so-called \"Linux\" \
+distributions are really distributions of GNU/Linux."
 }
 
 desc() {
-    # get description of youtube video(s) from their video ID
-    # requires youtube-dl
-    # example usage: $ desc xe27GQJpdqI ow3-1iWVKws
+    # Get description of youtube video(s) from their video ID
+    # Example usage:
+    # $ desc xe27GQJpdqI ow3-1iWVKws
     for ele in "$@"; do
-        link="https://youtube.com/watch?v=$ele"
+        link="https://youtube.com/watch?v=${ele#ytdl://}"
         echo "Fetching description of video $(youtube-dl --get-title $link)..."
         #echo "--------------------"
         youtube-dl --get-description "$link"
         echo "--------------------"
     done
 }
-
-piep() {
-    # terminal bell is usually silent, play sine over speakers in addition to it
-    # optional args determine duration and pitch
-    # requires sox
-    # example usage:
-    # $ piep        # half-second beep at 880 Hz
-    # $ piep 2      # this beep is 2 seconds long
-    # $ piep 1 440  # this beep is 1 second long and 1 octave lower than standard
-    if [[ $1 == "" ]]
-    then
-        duration="0.05"    
-    else
-        duration="$1"
-    fi
-    if [[ $2 == "" ]]
-    then
-        pitch="880"
-    else
-        pitch="$2"
-    fi
-    play -q -n synth "$duration" sin "$pitch" |  echo -e "\a"
-}
-
-quicklatex() {
-    # shorthand for quickly compiling and viewing latex files
-    # example usage: $ quicklatex mydoc.tex
-    if [[ $1 == "" ]]
-    then
-        echo "Error! Argument required!"
-        return 42
-    fi
-    pdflatex "$1" && pdflatex "$1" && evince "${1%.*}.pdf"
-}
-
-vgaconnect() {
-    # invoke after connecting / disconnecting secondary monitor
-    # change ALERT to echo if you want to stick to the terminal
-    # example usage: $ vgaconnect
-    PRIM="LVDS1"
-    EXT="VGA1"
-    ALERT="notify-send"
-    if [ -n "$(xrandr | grep "$EXT disconnected")" ]
-    then
-        xrandr --output "$PRIM" --auto --output "$EXT" --off \
-        && "$ALERT" "$EXT disconnected"
-    else
-        xrandr --output "$PRIM" --auto --output "$EXT" --auto --left-of "$PRIM" \
-        && "$ALERT" "$EXT connected"
-     fi
- }
