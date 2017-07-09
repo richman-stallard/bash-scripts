@@ -1,0 +1,31 @@
+#!/bin/bash
+
+# Cycles through some keyboard layouts and prints notifications.
+# Intended to be executed by WM on keypress, e.g. Super+Alt
+
+# Unset variables in case they're not empty.
+lang=''
+newlang=''
+var=''
+
+# Find out current language.
+lang=$(setxkbmap -query | grep layout | sed 's/layout: \+//')case "$lang" in
+    de )
+#        newlang='pl' ;;
+#    pl )
+        newlang='us'
+        var='-variant intl' ;;
+    us )
+        newlang='de' ;;
+    * )
+        notify-send -t 500 "Warning: Current layout unknown."
+        newlang='us'
+        var='-variant intl' ;;
+esac
+
+#notify-send -t 500 "old kb layout: $lang
+#new kb layout: $newlang $var"
+
+# Set the new keyboard layout.
+setxkbmap $newlang $var # Don't quote $var, it needs to be expanded.
+notify-send -t 500 "New keyboard layout: $newlang"
